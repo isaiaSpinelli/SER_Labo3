@@ -25,6 +25,12 @@ class Main {
     }
 
     public static void main(String[] args) {
+
+        GeojsonReader georeader = new GeojsonReader("countries.geojson");
+        georeader.parse();
+        List<Country> countryList = georeader.getCountryList();
+
+
         Element root = new Element("kml");
         root.setAttribute(new Attribute("xmlns", "http://www.opengis.net/kml/2.2"));
         Document doc = new Document(root);
