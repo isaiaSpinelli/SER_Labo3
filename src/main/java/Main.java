@@ -29,7 +29,7 @@ class Main {
         GeojsonReader georeader = new GeojsonReader("countries.geojson");
         georeader.parse();
         List<Country> countryList = georeader.getCountryList();
-
+        System.out.println(countryList.get(0).getCoordinates().get(0).get(0));
 
         Element root = new Element("kml");
         root.setAttribute(new Attribute("xmlns", "http://www.opengis.net/kml/2.2"));

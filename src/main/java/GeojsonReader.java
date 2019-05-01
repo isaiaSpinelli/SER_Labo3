@@ -58,7 +58,8 @@ public class GeojsonReader {
                     //System.out.println(coordinateLevel2);
                     country.addDimension();
                     for(Object coordinates : coordinateLevel2){
-                        Pair pairCoordinate = new Pair((double)((JSONArray)coordinates).get(0),(double) ((JSONArray)coordinates).get(1));
+                        //Pair pairCoordinate = new Pair((double)((JSONArray)coordinates).get(0),(double) ((JSONArray)coordinates).get(1));
+                        CustomPair pairCoordinate = new CustomPair(Double.toString((double)((JSONArray)coordinates).get(0)),Double.toString((double)((JSONArray)coordinates).get(1)));
                         //System.out.println(pairCoordinate);
                         country.addCoordinate(pairCoordinate, 0);
                     }
@@ -74,7 +75,7 @@ public class GeojsonReader {
                         JSONArray coordinateLevel2 = (JSONArray) ((JSONArray)multiCoord).get(0);
                         for(Object coordinates : coordinateLevel2){
 
-                            Pair pairCoordinate = new Pair((double)((JSONArray)coordinates).get(0),(double) ((JSONArray)coordinates).get(1));
+                            CustomPair pairCoordinate = new CustomPair(Double.toString((double)((JSONArray)coordinates).get(0)),Double.toString((double)((JSONArray)coordinates).get(1)));
                             country.addCoordinate(pairCoordinate,index);
                             //System.out.println(pairCoordinate);
                         }

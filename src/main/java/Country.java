@@ -6,7 +6,7 @@ import java.util.List;
 public class Country {
     private String name;
 
-    private List<List<Pair>> coordinates;
+    private List<List<CustomPair>> coordinates;
 
     public Country(String name){
         this.name = name;
@@ -17,16 +17,17 @@ public class Country {
         return name;
     }
 
-    public List<List<Pair>> getCoordinates() {
+    public List<List<CustomPair>> getCoordinates() {
         return coordinates;
     }
 
     public void addDimension(){
-        List<Pair> pair = new ArrayList<>();
+        List<CustomPair> pair = new ArrayList<>();
         this.coordinates.add(pair);
 
     }
-    public void addCoordinate(Pair coordinate, int index){
+
+    public void addCoordinate(CustomPair coordinate, int index){
         this.coordinates.get(index).add(coordinate);
     }
 }
