@@ -9,5 +9,8 @@
         <module name="ch.heig.vd.ser.labo3" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="ch.heig.vd.ser.labo3" target="8" />
+    </bytecodeTargetLevel>
   </component>
 </project>

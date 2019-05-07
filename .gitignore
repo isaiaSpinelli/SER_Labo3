@@ -1,3 +1,4 @@
 .idea
+*.iml
 ch.heigvd.ser.labo3.iml
 target/*

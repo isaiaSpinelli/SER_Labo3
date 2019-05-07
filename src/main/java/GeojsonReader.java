@@ -40,18 +40,18 @@ public class GeojsonReader {
 
             for (Object feature : allFeatures) {
 
-                System.out.println("Nouveau pays");
+                //System.out.println("Nouveau pays");
                 JSONObject properties = (JSONObject) ((JSONObject) feature).get("properties");
                 String name = (String) properties.get("ADMIN");
                 String code = (String) properties.get("ISO_A3");
-                Country country = new Country(name);
-                System.out.println(name + " " + code);
+                Country country = new Country(name, code);
+                //System.out.println(name + " " + code);
 
                 JSONObject geometry = (JSONObject) ((JSONObject) feature).get("geometry");
                 String typePolygon =  (String) geometry.get("type");
 
                 if(typePolygon.equals("Polygon")){
-                    System.out.println("Polygon");
+                    //System.out.println("Polygon");
                     JSONArray allCoordinates = (JSONArray) geometry.get("coordinates");
                     //System.out.println(allCoordinates);
                     JSONArray coordinateLevel2 = (JSONArray) allCoordinates.get(0);
@@ -64,14 +64,14 @@ public class GeojsonReader {
                         country.addCoordinate(pairCoordinate, 0);
                     }
                 }else if(typePolygon.equals("MultiPolygon")){
-                    System.out.println("MultiPolygon");
+                    //System.out.println("MultiPolygon");
 
                     JSONArray allCoordinates = (JSONArray) geometry.get("coordinates");
 
                     int index = 0;
                     for(Object multiCoord : allCoordinates){
                         country.addDimension();
-                        System.out.println(index);
+                        //System.out.println(index);
                         JSONArray coordinateLevel2 = (JSONArray) ((JSONArray)multiCoord).get(0);
                         for(Object coordinates : coordinateLevel2){
 
@@ -86,7 +86,9 @@ public class GeojsonReader {
                 this.countryList.add(country);
 
             }
-            System.out.println(countryList);
+            // Affiche tous les pays et le nombre de ses coordonnees
+            for (Country country : countryList)
+                System.out.println(country);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {

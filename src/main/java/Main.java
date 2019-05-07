@@ -29,8 +29,17 @@ class Main {
         GeojsonReader georeader = new GeojsonReader("countries.geojson");
         georeader.parse();
         List<Country> countryList = georeader.getCountryList();
-        System.out.println(countryList.get(0).getCoordinates().get(0).get(0));
 
+
+        // Crée un KML et ajoutes les pays
+        KMLWriter klm = new KMLWriter();
+        klm.addCountries(countryList);
+
+        // Crée le fichier
+        File file = new File("test.KML");
+        // Ecrit le fichier
+        klm.writeFile(file);
+        /*
         Element root = new Element("kml");
         root.setAttribute(new Attribute("xmlns", "http://www.opengis.net/kml/2.2"));
         Document doc = new Document(root);
@@ -89,6 +98,6 @@ class Main {
         }
         catch(IOException ex){
             System.out.println(ex.getMessage());
-        }
+        }*/
     }
 }
