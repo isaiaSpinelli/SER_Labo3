@@ -30,7 +30,13 @@ class Main {
         georeader.parse();
         List<Country> countryList = georeader.getCountryList();
 
+        // Crée un KML et ajoutes les pays
+        KMLWriterJDOM klm = new KMLWriterJDOM();
+        klm.addCountries(countryList);
+        // Ecrit le fichier
+        klm.writeFile("src/test.KML");
 
+/*
         // Crée un KML et ajoutes les pays
         KMLWriter klm = new KMLWriter();
         klm.addCountries(countryList);
@@ -38,7 +44,9 @@ class Main {
         // Crée le fichier
         File file = new File("test.KML");
         // Ecrit le fichier
-        klm.writeFile(file);
+        klm.writeFile(file);*/
+
+
         /*
         Element root = new Element("kml");
         root.setAttribute(new Attribute("xmlns", "http://www.opengis.net/kml/2.2"));
