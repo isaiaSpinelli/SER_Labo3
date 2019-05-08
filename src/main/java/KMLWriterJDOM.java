@@ -3,157 +3,149 @@ import org.jdom2.Element;
 import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 
-import java.io.File;
 import java.io.FileWriter;
 import java.util.List;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.TransformerFactory;
-
-
+/**
+ * Cette classe permet de généré un fichier kml suite à la lecture et parsage du fichier geojson
+ */
 public class KMLWriterJDOM {
 
-    private Element root1;
-    private Element root;
-    private Document doc;
+    private Element kmlRoot;
+    private Element document;
+    private Document documentType;
+
     final private String COLORLINE = "ffffffff";
     final private String FILLPLOYGONE = "0";
 
+    /**
+     * Permet d'instancier la structure principal du fichier kml, l'en-tête root et document
+     */
     public KMLWriterJDOM() {
         try {
-            root1 = new Element("kml");
-            // xmlns ne fonctionne pas
-            root1.setAttribute("xmlns2","http://www.opengis.net/kml/2.2");
-
-            root =  new Element("Document");
-            root.setAttribute("id","root_doc");
-            root1.addContent(root);
+            kmlRoot = new Element("kml");
+            kmlRoot.setAttribute("xmlns2","http://www.opengis.net/kml/2.2");
+            document =  new Element("Document");
+            document.setAttribute("id","root_doc");
+            kmlRoot.addContent(document);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
 
-    /*
-     * Ajout de plusieurs pays dans le fichier KML
+    /**
+     * Ajoute tous les pays un à un dans le fichier depuis la liste fournie
+     * @param countries liste de pays à ajouter au fichier
      */
     public void addCountries(List<Country> countries) {
-
-        // Pour chaque pays, l'ajoute
+        // Les pays sont ajoutés un à un
         for (Country country : countries){
             addCountry(country);
         }
-
     }
 
-    /*
-    * Ajout d'un pays dans le fichier KML
+    /**
+     * Ajoute le pays dans le fichier
+     * @param country le pays à ajouter
      */
     public void addCountry(Country country) {
-        // Crée un nouveau Placemark
+        // Créé l'instance englobant le pays et ses propriétés
         Element placemark =  new Element("Placemark");
-        root.addContent(placemark);
+        document.addContent(placemark);
         // Ajoute le nom du pays
         Element name =  new Element("name");
         name.addContent(country.getName());
         placemark.addContent(name);
 
-        // Ajoute le style de la forme
+        // Ajoute le style permettant d'entourer en blanc la frontière du pays
         addStyle(placemark);
 
-        addExtendedData(placemark, country);
-
-        // Pour chaque liste de coordinates
-        for (List<CustomPair> listCoor : country.getCoordinates()){
-            addCoordinate(placemark,listCoor);
-        }
-
+        // Les coordonnées sont entièrements ajoutées
+        addCoordinate(placemark, country.getCoordinates());
     }
 
-    /*
-    * Permet d'ajouter le style des polygones pour chaque pays
+    /**
+     * Ajoute un style, un contour blanc à la frontière du pays
+     * @param placemark
      */
     public void addStyle(Element placemark) {
         Element style = new Element("Style");
 
-        // Ajout le Style de la ligne
+        // Ajoute le Style du trait
         Element lineStyle = new Element("LineStyle");
         Element color = new Element("Color");
         color.addContent(COLORLINE);
         lineStyle.addContent(color);
-        // l'ajoute dans style
+        // Ajoute dans l'objet style
         style.addContent(lineStyle);
 
-        // Ajout le Style du polygone
+        // Ajoute le style du polygone
         Element polyStyle = new Element("PolyStyle");
         Element fill = new Element("fill");
         fill.addContent(FILLPLOYGONE);
         polyStyle.addContent(fill);
-        // l'ajoute dans style
+        // Ajoute dans l'objet style
         style.addContent(polyStyle);
 
-        // Ajoute le toute dans le placemark
+        // Le style est ajouté dans le placemark du pays
         placemark.addContent(style);
     }
 
-    /*
-     * Permet d'ajouter les simples datas du pays
+    /**
+     * Ajoute les coordonnées en gérant les polygons simples ou multipolygons
+     * @param placemark représente l'englobeur d'un pays dans le fichier
+     * @param coordinates les coordonnées des zones du pays
      */
-    public void addExtendedData(Element placemark, Country country) {
-        Element extendedData = new Element("ExtendedData");
+    public void addCoordinate(Element placemark, List<List<CustomPair>> coordinates) {
+        boolean isMulti = coordinates.size() > 1;
+        Element multiGeometry = null;
 
-        // Ajout le premier SimpleDate (ADMIN)
-        Element simpleData = new Element("SimpleData");
-        simpleData.setAttribute("name", "ADMIN");
-        simpleData.addContent(country.getName());
-
-        extendedData.addContent(simpleData);
-
-        // Ajout le premier SimpleDate (ISO_A3)
-        Element simpleData2 = new Element("SimpleData");
-        simpleData2.setAttribute("name", "ISO_A3");
-        simpleData2.addContent(country.getCode());
-
-        extendedData.addContent(simpleData2);
-
-        // Ajoute le toute dans le placemark
-        placemark.addContent(extendedData);
-
-
-    }
-
-    public void addCoordinate(Element placemark, List<CustomPair> coordinates) {
-
-        Element polygon = new Element("Polygon");
-
-        // Ajout le outerBoundaryIs
-        Element outerBoundaryIs = new Element("outerBoundaryIs");
-
-        // Ajout le outerBoundaryIs
-        Element linearRing = new Element("LinearRing");
-        outerBoundaryIs.addContent(linearRing);
-
-        // Ajout le outerBoundaryIs
-        Element coord = new Element("coordinates");
-        for (CustomPair customPair : coordinates){
-            coord.addContent(customPair.toString() + " ");
+        // Vérifie qu'il y a plusieurs polygons, donc multipolygons
+        if (isMulti){
+            multiGeometry = new Element("MultiGeometry");
         }
-        linearRing.addContent(coord);
 
-        polygon.addContent(outerBoundaryIs);
+        // On effectue l'ajout des coordonnées que si elles existent
+        if(coordinates.size() > 0) {
+            Element polygon = null;
+            // Parcourt chaque polygons
+            for (int j = 0; j < coordinates.size(); ++j) {
+                polygon = new Element("Polygon");
+                String coordToBuild = "";
 
-        // Ajoute le toute dans le placemark
-        placemark.addContent(polygon);
+                // Parcourt la liste de coordonnées de chaque polygons
+                for (int i = 0; i < coordinates.get(j).size(); ++i) {
+                    // Chaque coordonnée est concaténée pour former une seule chaîne
+                    coordToBuild += coordinates.get(j).get(i).toString() + "\n";
+                }
+                // Implémente les balises complètes des coordonnées
+                Element completeCoordinates = new Element("outerBoundaryIs").addContent(new Element("LinearRing")
+                        .addContent(new Element("coordinates").setText(coordToBuild)));
+                polygon.addContent(completeCoordinates);
 
+                // On ajoute le polygon au multipolygons s'il y en plusieurs
+                if (isMulti) {
+                    multiGeometry.addContent(polygon);
+                }
+            }
+            // Les coordonnées finales sont ajoutés au placemark qui englobe le pays et ses propriétés
+            placemark.addContent(isMulti ? multiGeometry : polygon);
+
+        }
     }
 
-    public  boolean writeFile(String name) {
+    /**
+     *  Écrit la sortie générée dans le fichier kml
+     * @param name le nom du fichier à générer
+     * @return un booléen permettant de savoir si l'opération s'est bien déroulée
+     */
+    public boolean writeFile(String name) {
         try {
-            doc = new Document(root1);
+            documentType = new Document(kmlRoot);
             XMLOutputter xmlOutputer = new XMLOutputter();
             xmlOutputer.setFormat(Format.getPrettyFormat());
-            xmlOutputer.output(doc, new FileWriter(name));
+            xmlOutputer.output(documentType, new FileWriter(name));
         } catch(Exception e) {
             e.printStackTrace();
             return false;
