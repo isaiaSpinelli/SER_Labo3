@@ -40,7 +40,7 @@ public class Country {
 
     /**
      * Récupère la liste de polygon avec chacune, sa liste de coordonnées
-     * @return
+     * @return la liste de toute les coordonnées
      */
     public List<List<CustomPair>> getCoordinates() {
         return coordinates;
@@ -68,7 +68,7 @@ public class Country {
      * Transforme les coordonnées en une chaîne de caractère unique
      * @return la chaîne complète représentant les coordonnées
      */
-    public String coordinatesToString(){
+    private String coordinatesToString(){
         StringBuffer coord = new StringBuffer();
         for (List<CustomPair> listCountries : coordinates){
             coord.append( "\n\t- "+(listCountries.size())+" coordinates" );

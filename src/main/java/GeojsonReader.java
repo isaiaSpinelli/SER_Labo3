@@ -43,40 +43,54 @@ public class GeojsonReader {
             // Lecture du fichier
             Object obj = jsonParser.parse(reader);
 
+            // Création de notre objet JSON principal
             JSONObject allData = (JSONObject) obj;
 
-            // Parcours du tableau de personnes
+            // Parcours du tableau de features
             JSONArray allFeatures = (JSONArray) allData.get("features");
 
             // Parcourt chaque objet du fichier geojson
             for (Object feature : allFeatures) {
                 JSONObject properties = (JSONObject) ((JSONObject) feature).get("properties");
+
+                // Recupération du nom et du code du pays
                 String name = (String) properties.get("ADMIN");
                 String code = (String) properties.get("ISO_A3");
+
+                // Création du pays
                 Country country = new Country(name, code);
 
+                // Récuperation de notre objet "geometry"
                 JSONObject geometry = (JSONObject) ((JSONObject) feature).get("geometry");
+
+                // Permet de recuperer le type de polygon du pays
                 String typePolygon =  (String) geometry.get("type");
 
-                // Vérifie qu'il y ait un polygon et non un multipolygon
+                // Vérification du type de polygon pour avoir un comportement différent
                 if(typePolygon.equals("Polygon")){
+                    // Récupértion du tableau de tableau de coordonnées
                     JSONArray allCoordinates = (JSONArray) geometry.get("coordinates");
+                    // Récupération du tableau de coordonnées
                     JSONArray coordinateLevel2 = (JSONArray) allCoordinates.get(0);
+                    // Ajout d'une ArrayListe<CustomPair> a notre liste de coordonnées
                     country.addDimension();
                     for(Object coordinates : coordinateLevel2){
-                        CustomPair pairCoordinate = new CustomPair(Double.toString((double)((JSONArray)coordinates).get(0)),Double.toString((double)((JSONArray)coordinates).get(1)));
+                        // Création de la pair avec les deux coordonnées récupérées
+                        CustomPair pairCoordinate = new CustomPair(Double.toString((double)((JSONArray)coordinates).get(0)),
+                                Double.toString((double)((JSONArray)coordinates).get(1)));
                         country.addCoordinate(pairCoordinate, 0);
                     }
                 }else if(typePolygon.equals("MultiPolygon")){
                     JSONArray allCoordinates = (JSONArray) geometry.get("coordinates");
 
                     int index = 0;
-
                     for(Object multiCoord : allCoordinates){
+                        // Pour chaque polygon du multipolgon, ajout d'une dimension de liste
                         country.addDimension();
+                        // Récupération du tableau de coordonnées
                         JSONArray coordinateLevel2 = (JSONArray) ((JSONArray)multiCoord).get(0);
                         for(Object coordinates : coordinateLevel2){
-
+                            // Création de la pair avec les deux coordonnées récupérées
                             CustomPair pairCoordinate = new CustomPair(Double.toString((double)((JSONArray)coordinates).get(0)),Double.toString((double)((JSONArray)coordinates).get(1)));
                             country.addCoordinate(pairCoordinate,index);
                         }
@@ -87,13 +101,10 @@ public class GeojsonReader {
 
             }
             // Affiche tous les pays et le nombre de ses coordonnées
-            for (Country country : countryList)
+            for (Country country : countryList) {
                 System.out.println(country);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ParseException e) {
+            }
+        } catch (ParseException | IOException e) {
             e.printStackTrace();
         }
     }

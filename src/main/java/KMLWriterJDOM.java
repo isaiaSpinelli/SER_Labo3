@@ -49,7 +49,7 @@ public class KMLWriterJDOM {
      * Ajoute le pays dans le fichier
      * @param country le pays à ajouter
      */
-    public void addCountry(Country country) {
+    private void addCountry(Country country) {
         // Créé l'instance englobant le pays et ses propriétés
         Element placemark =  new Element("Placemark");
         document.addContent(placemark);
@@ -69,7 +69,7 @@ public class KMLWriterJDOM {
      * Ajoute un style, un contour blanc à la frontière du pays
      * @param placemark
      */
-    public void addStyle(Element placemark) {
+    private void addStyle(Element placemark) {
         Element style = new Element("Style");
 
         // Ajoute le Style du trait
@@ -97,7 +97,7 @@ public class KMLWriterJDOM {
      * @param placemark représente l'englobeur d'un pays dans le fichier
      * @param coordinates les coordonnées des zones du pays
      */
-    public void addCoordinate(Element placemark, List<List<CustomPair>> coordinates) {
+    private void addCoordinate(Element placemark, List<List<CustomPair>> coordinates) {
         boolean isMulti = coordinates.size() > 1;
         Element multiGeometry = null;
 
@@ -110,18 +110,18 @@ public class KMLWriterJDOM {
         if(coordinates.size() > 0) {
             Element polygon = null;
             // Parcourt chaque polygons
-            for (int j = 0; j < coordinates.size(); ++j) {
+            for (List<CustomPair> coordinate : coordinates) {
                 polygon = new Element("Polygon");
-                String coordToBuild = "";
+                StringBuilder coordToBuild = new StringBuilder();
 
                 // Parcourt la liste de coordonnées de chaque polygons
-                for (int i = 0; i < coordinates.get(j).size(); ++i) {
+                for (int i = 0; i < coordinate.size(); ++i) {
                     // Chaque coordonnée est concaténée pour former une seule chaîne
-                    coordToBuild += coordinates.get(j).get(i).toString() + "\n";
+                    coordToBuild.append(coordinate.get(i).toString()).append("\n\t\t\t\t\t\t");
                 }
                 // Implémente les balises complètes des coordonnées
                 Element completeCoordinates = new Element("outerBoundaryIs").addContent(new Element("LinearRing")
-                        .addContent(new Element("coordinates").setText(coordToBuild)));
+                        .addContent(new Element("coordinates").setText(coordToBuild.toString())));
                 polygon.addContent(completeCoordinates);
 
                 // On ajoute le polygon au multipolygons s'il y en plusieurs
@@ -138,9 +138,8 @@ public class KMLWriterJDOM {
     /**
      *  Écrit la sortie générée dans le fichier kml
      * @param name le nom du fichier à générer
-     * @return un booléen permettant de savoir si l'opération s'est bien déroulée
      */
-    public boolean writeFile(String name) {
+    public void writeFile(String name) {
         try {
             documentType = new Document(kmlRoot);
             XMLOutputter xmlOutputer = new XMLOutputter();
@@ -148,9 +147,7 @@ public class KMLWriterJDOM {
             xmlOutputer.output(documentType, new FileWriter(name));
         } catch(Exception e) {
             e.printStackTrace();
-            return false;
         }
-        return true;
     }
 
 }
